@@ -402,7 +402,7 @@ export function LargeTitleHeader({
   scrolled?: boolean;
 }) {
   return (
-    <header className={`rk-header ${scrolled ? "solid hairline" : ""}`}>
+    <header className={`rk-header solid ${scrolled ? "hairline" : ""}`}>
       <div className="rk-bar">
         <div className="rk-bar-side" />
         <div className="rk-bar-title" style={{ opacity: scrolled ? 1 : 0 }}>{title}</div>

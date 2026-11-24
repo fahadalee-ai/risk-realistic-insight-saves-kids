@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { content } from "../data/content.js";
 import { images } from "../data/images";
-import { digits, downloadIcs, formatLongDate, serviceById, shareText, validEmail } from "../lib/format";
+import { downloadIcs, formatLongDate, serviceById, shareText } from "../lib/format";
 import { useApp } from "../lib/store";
 import { useGo } from "../lib/nav";
 import {
@@ -27,8 +27,6 @@ export function BookScreen({ step }: { step: number }) {
   const { booking } = app.state;
   const { go, replace } = useGo();
   const service = serviceById(booking.serviceId);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loginOpen, setLoginOpen] = useState(false);
   const [ageOpen, setAgeOpen] = useState(false);
   const [doneId, setDoneId] = useState("");
 
@@ -45,33 +43,9 @@ export function BookScreen({ step }: { step: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [app.user?.id]);
 
-  useEffect(() => {
-    if (step > 1 && !booking.serviceId) replace("/book", { step: 1 });
-  }, [step, booking.serviceId, replace]);
-
   const next = (to: number) => go("/book", { step: to });
 
-  const validateDetails = () => {
-    const nextErrors: Record<string, string> = {};
-    if (!booking.name.trim()) nextErrors.name = ui.required;
-    if (!validEmail(booking.email)) nextErrors.email = ui.emailInvalid;
-    if (digits(booking.phone).length < 7) nextErrors.phone = ui.phoneInvalid;
-    if (booking.forWhom === "child" && !booking.childAge) nextErrors.childAge = ui.required;
-    if (booking.forWhom === "group" && !booking.organization.trim()) nextErrors.organization = ui.required;
-    if (booking.topics.length === 0) nextErrors.topics = ui.pickTopic;
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
   const confirm = () => {
-    if (!booking.terms) {
-      setErrors({ terms: ui.termsRequired });
-      return;
-    }
-    if (app.state.session.status !== "authed") {
-      setLoginOpen(true);
-      return;
-    }
     if (booking.mode === "reschedule") sessionStorage.setItem("risk-book-result", "updated");
     else sessionStorage.removeItem("risk-book-result");
     const appointment = app.confirmBooking();
@@ -95,9 +69,6 @@ export function BookScreen({ step }: { step: number }) {
           <div className="rk-actionbar">
             <Button
               onClick={() => {
-                if (step === 1 && !booking.serviceId) return setErrors({ service: ui.pickService });
-                if (step === 3 && (!booking.date || !booking.time)) return setErrors({ when: ui.pickDate });
-                if (step === 4 && !validateDetails()) return;
                 if (step === 5) return confirm();
                 next(step + 1);
               }}
@@ -110,9 +81,6 @@ export function BookScreen({ step }: { step: number }) {
     >
       {step < 6 && <ProgressStepper step={step} />}
       <div className="rk-pad rk-stack" style={{ paddingTop: 8 }}>
-        {errors.service && <p className="rk-error">{errors.service}</p>}
-        {errors.when && <p className="rk-error">{errors.when}</p>}
-
         {step === 1 &&
           content.services.map((item) => (
             <button
@@ -168,20 +136,17 @@ export function BookScreen({ step }: { step: number }) {
               options={content.bookingFor}
               onChange={(id) => app.patchBooking({ forWhom: id as typeof booking.forWhom })}
             />
-            <Input label={ui.fullName} value={booking.name} onChange={(name) => app.patchBooking({ name })} error={errors.name} autoComplete="name" />
-            <Input label={ui.email} value={booking.email} onChange={(email) => app.patchBooking({ email })} inputMode="email" error={errors.email} />
-            <Input label={ui.phone} value={booking.phone} onChange={(phone) => app.patchBooking({ phone })} inputMode="tel" error={errors.phone} />
+            <Input label={ui.fullName} value={booking.name} onChange={(name) => app.patchBooking({ name })} autoComplete="name" />
+            <Input label={ui.email} value={booking.email} onChange={(email) => app.patchBooking({ email })} inputMode="email" />
+            <Input label={ui.phone} value={booking.phone} onChange={(phone) => app.patchBooking({ phone })} inputMode="tel" />
             {booking.forWhom === "child" && (
-              <div>
-                <button type="button" className="rk-input" onClick={() => setAgeOpen(true)}>
-                  {booking.childAge || ui.childAge}
-                </button>
-                {errors.childAge && <p className="rk-error">{errors.childAge}</p>}
-              </div>
+              <button type="button" className="rk-input" onClick={() => setAgeOpen(true)}>
+                {booking.childAge || ui.childAge}
+              </button>
             )}
             {booking.forWhom === "group" && (
               <>
-                <Input label={ui.organization} value={booking.organization} onChange={(organization) => app.patchBooking({ organization })} error={errors.organization} />
+                <Input label={ui.organization} value={booking.organization} onChange={(organization) => app.patchBooking({ organization })} />
                 <div className="rk-inline">
                   <span className="rk-label">{ui.attendees}</span>
                   <Stepper label={ui.attendees} value={booking.attendees} min={2} onChange={(attendees) => app.patchBooking({ attendees })} />
@@ -207,26 +172,24 @@ export function BookScreen({ step }: { step: number }) {
                   </Chip>
                 ))}
               </div>
-              {errors.topics && <p className="rk-error">{errors.topics}</p>}
             </div>
             <Input label={ui.notes} value={booking.notes} onChange={(notes) => app.patchBooking({ notes: notes.slice(0, 500) })} multiline />
             <p className="rk-count">{booking.notes.length}/500</p>
           </>
         )}
 
-        {step === 5 && service && (
+        {step === 5 && (
           <>
             <InsetGroupedList>
-              <ListItem title={service.title} subtitle={ui.chooseService} trailing={<button type="button" className="rk-link" onClick={() => next(1)}>{ui.edit}</button>} />
+              <ListItem title={service?.title || ui.chooseService} subtitle={ui.chooseService} trailing={<button type="button" className="rk-link" onClick={() => next(1)}>{ui.edit}</button>} />
               <ListItem title={content.types.find((item) => item.id === booking.type)?.label || ""} subtitle={ui.appointmentType} trailing={<button type="button" className="rk-link" onClick={() => next(2)}>{ui.edit}</button>} />
-              <ListItem title={`${booking.date ? formatLongDate(booking.date) : ""} · ${booking.time}`} subtitle={ui.dateTime} trailing={<button type="button" className="rk-link" onClick={() => next(3)}>{ui.edit}</button>} />
-              <ListItem title={booking.name} subtitle={`${booking.email} · ${booking.phone}`} trailing={<button type="button" className="rk-link" onClick={() => next(4)}>{ui.edit}</button>} />
+              <ListItem title={[booking.date ? formatLongDate(booking.date) : "", booking.time].filter(Boolean).join(" · ")} subtitle={ui.dateTime} trailing={<button type="button" className="rk-link" onClick={() => next(3)}>{ui.edit}</button>} />
+              <ListItem title={booking.name} subtitle={[booking.email, booking.phone].filter(Boolean).join(" · ")} trailing={<button type="button" className="rk-link" onClick={() => next(4)}>{ui.edit}</button>} />
               {booking.notes && <ListItem title={ui.notes} subtitle={booking.notes} />}
             </InsetGroupedList>
             <Checkbox checked={booking.terms} onChange={(terms) => app.patchBooking({ terms })}>
               {ui.termsCheck}
             </Checkbox>
-            {errors.terms && <p className="rk-error">{errors.terms}</p>}
           </>
         )}
 
@@ -242,7 +205,7 @@ export function BookScreen({ step }: { step: number }) {
             <p className="rk-body">{ui.reference} {created.reference}</p>
             <div className="rk-card rk-card-pad" style={{ textAlign: "left" }}>
               <strong>{serviceById(created.serviceId)?.title}</strong>
-              <p>{formatLongDate(created.date)}</p>
+              <p>{created.date ? formatLongDate(created.date) : ""}</p>
               <p>{created.time} · {content.contact.timezone}</p>
             </div>
             <Button
@@ -282,13 +245,6 @@ export function BookScreen({ step }: { step: number }) {
             {age}
           </button>
         ))}
-      </Sheet>
-      <Sheet open={loginOpen} onClose={() => setLoginOpen(false)} title={ui.guestPrompt}>
-        <p className="rk-body rk-secondary" style={{ marginBottom: 16 }}>{ui.guestPromptText}</p>
-        <div className="rk-stack">
-          <Button onClick={() => { sessionStorage.setItem("risk-return", "review"); go("/login"); }}>{ui.signIn}</Button>
-          <Button variant="secondary" onClick={() => { sessionStorage.setItem("risk-return", "review"); go("/register"); }}>{ui.createAccount}</Button>
-        </div>
       </Sheet>
     </ScreenContainer>
   );

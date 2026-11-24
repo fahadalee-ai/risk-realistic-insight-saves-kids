@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { content } from "../data/content.js";
 import { images } from "../data/images";
-import { passwordStrength, validEmail, digits } from "../lib/format";
 import { useApp } from "../lib/store";
 import { useGo } from "../lib/nav";
-import { Button, Checkbox, Chip, Input, Logo, ScreenContainer, Sheet } from "../components/ios";
+import { Button, Checkbox, Chip, Input, ScreenContainer, Sheet } from "../components/ios";
 
 const ui = content.ui;
 
@@ -32,12 +31,10 @@ export function SplashScreen() {
     <div className="rk-splash">
       <div className="rk-logo-wrap">
         <span className="rk-ring" />
-        <Logo size={160} />
+        <p className="rk-wordmark">{content.brand.name}</p>
       </div>
       <div className="rk-fade">
-        <h1 className="rk-h3" style={{ color: "var(--primary-text)" }}>
-          {content.brand.tagline}
-        </h1>
+        <h1 className="rk-splash-tag">{content.brand.tagline}</h1>
         <div className="rk-dotpulse" style={{ marginTop: 16 }} aria-hidden>
           <i />
           <i />
@@ -71,39 +68,22 @@ export function OnboardingScreen() {
         if (dx > 50) setPage((value) => Math.max(0, value - 1));
       }}
     >
-      <img
-        src={images[slide.image as keyof typeof images]}
-        alt=""
-        style={{ position: "absolute", inset: 0, width: "100%", height: "62%", objectFit: "cover" }}
-      />
+      <img className="rk-onboard-photo" src={images[slide.image as keyof typeof images]} alt="" />
+      <div className="rk-onboard-scrim" />
       {page < 2 && (
-        <button type="button" className="rk-link" style={{ position: "absolute", top: "var(--safe-t)", right: 16, color: "#fff", background: "rgba(0,0,0,0.45)", borderRadius: 999, padding: "0 12px" }} onClick={() => finish("/login")}>
+        <button type="button" className="rk-link rk-onboard-skip" onClick={() => finish("/login")}>
           {ui.skip}
         </button>
       )}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: "52%",
-          background: "var(--bg)",
-          borderRadius: "28px 28px 0 0",
-          padding: "24px 16px calc(16px + var(--safe-b))",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        <h1 className="rk-h1">{slide.title}</h1>
-        <p className="rk-body rk-secondary rk-copy">{slide.text}</p>
-        <div className="rk-dots" aria-hidden>
+      <div className="rk-onboard-copy">
+        <h1>{slide.title}</h1>
+        <p className="rk-copy">{slide.text}</p>
+        <div className="rk-dots on-dark" aria-hidden>
           {content.onboarding.map((item, index) => (
             <i key={item.title} className={index === page ? "on" : ""} />
           ))}
         </div>
-        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="rk-onboard-actions">
           {page < 2 ? (
             <Button onClick={() => setPage((value) => value + 1)}>{ui.next}</Button>
           ) : (
@@ -125,44 +105,35 @@ export function LoginScreen() {
   const { go, replace } = useGo();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const [loading, setLoading] = useState(false);
 
   const submit = () => {
-    const next: typeof errors = {};
-    if (!validEmail(email)) next.email = ui.emailInvalid;
-    if (password.length < 8) next.password = ui.passwordShort;
-    setErrors(next);
-    if (Object.keys(next).length) return;
     setLoading(true);
     window.setTimeout(() => {
       const message = signIn(email, password);
       setLoading(false);
-      if (message) setErrors({ form: message });
-      else if (takeReturn() === "review") replace("/book", { step: 5 });
+      if (message) continueGuest();
+      if (takeReturn() === "review") replace("/book", { step: 5 });
       else replace("/home");
     }, 400);
   };
 
   return (
     <ScreenContainer mode="none">
-      <div className="rk-auth-banner">
-        <img className="bg" src={images.auth} alt="" />
-        <img className="logo" src={images.logo} alt={content.brand.title} />
-      </div>
-      <div className="rk-pad rk-stack" style={{ paddingTop: 24, paddingBottom: 32 }}>
-        <div>
-          <h1 className="rk-h1">{ui.welcomeBack}</h1>
-          <p className="rk-sub">{ui.signInSubtitle}</p>
-        </div>
-        <Input label={ui.email} value={email} onChange={setEmail} inputMode="email" autoComplete="email" error={errors.email} />
-        <Input label={ui.password} type="password" value={password} onChange={setPassword} autoComplete="current-password" error={errors.password} />
+      <div className="rk-auth">
+        <header className="rk-auth-head">
+          <p className="rk-wordmark sm">{content.brand.name}</p>
+          <h1>{ui.welcomeBack}</h1>
+          <p>{ui.signInSubtitle}</p>
+        </header>
+        <div className="rk-auth-card">
+        <Input label={ui.email} value={email} onChange={setEmail} inputMode="email" autoComplete="email" />
+        <Input label={ui.password} type="password" value={password} onChange={setPassword} autoComplete="current-password" />
         <div style={{ textAlign: "right" }}>
           <button type="button" className="rk-link" onClick={() => go("/forgot", { step: 1 })}>
             {ui.forgot}
           </button>
         </div>
-        {errors.form && <p className="rk-error">{errors.form}</p>}
         <Button onClick={submit} loading={loading}>
           {ui.signIn}
         </Button>
@@ -185,7 +156,8 @@ export function LoginScreen() {
         >
           {ui.google}
         </Button>
-        <p className="rk-body" style={{ textAlign: "center" }}>
+        </div>
+        <p className="rk-auth-foot">
           {ui.new}{" "}
           <button type="button" className="rk-link" onClick={() => go("/register")}>
             {ui.create}
@@ -220,25 +192,14 @@ export function RegisterScreen() {
     role: content.roles[0],
     agree: false,
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [codes, setCodes] = useState(false);
   const [legal, setLegal] = useState<"terms" | "privacy" | null>(null);
   const country = content.countries.find((item) => item.id === form.countryId)!;
-  const strength = passwordStrength(form.password);
   const set = (key: string, value: string | boolean) => setForm((current) => ({ ...current, [key]: value }));
 
   const submit = () => {
-    const next: Record<string, string> = {};
-    if (!form.first.trim() || !form.last.trim()) next.name = ui.required;
-    if (!validEmail(form.email)) next.email = ui.emailInvalid;
-    if (digits(form.phone).length < 7) next.phone = ui.phoneInvalid;
-    if (form.password.length < 8) next.password = ui.passwordShort;
-    if (form.password !== form.confirm) next.confirm = ui.passwordMismatch;
-    if (!form.agree) next.agree = ui.termsRequired;
-    setErrors(next);
-    if (Object.keys(next).length) return;
-    const message = beginRegister({
-      firstName: form.first.trim(),
+    beginRegister({
+      firstName: form.first.trim() || "Guest",
       lastName: form.last.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
@@ -246,18 +207,18 @@ export function RegisterScreen() {
       password: form.password,
       role: form.role,
     });
-    if (message) setErrors({ email: message });
-    else go("/verify");
+    go("/verify");
   };
 
   return (
     <ScreenContainer mode="inline" title={ui.createTitle} fallback="/login">
-      <div className="rk-pad rk-stack" style={{ paddingTop: 16 }}>
+      <div className="rk-pad rk-auth-form">
+        <p className="rk-wordmark sm">{content.brand.name}</p>
         <Input label={ui.fullName} value={`${form.first}${form.last ? " " + form.last : ""}`} onChange={(value) => {
           const [first, ...rest] = value.split(" ");
           setForm((current) => ({ ...current, first, last: rest.join(" ") }));
-        }} autoComplete="name" error={errors.name} />
-        <Input label={ui.email} value={form.email} onChange={(value) => set("email", value)} inputMode="email" autoComplete="email" error={errors.email} />
+        }} autoComplete="name" />
+        <Input label={ui.email} value={form.email} onChange={(value) => set("email", value)} inputMode="email" autoComplete="email" />
         <div className="rk-field">
           <span className="rk-label">{ui.phone}</span>
           <div style={{ display: "flex", gap: 8 }}>
@@ -266,18 +227,9 @@ export function RegisterScreen() {
             </button>
             <input className="rk-input" style={{ paddingRight: 16 }} inputMode="tel" autoComplete="tel" value={form.phone} onChange={(event) => set("phone", event.target.value)} />
           </div>
-          {errors.phone && <span className="rk-error">{errors.phone}</span>}
         </div>
-        <Input label={ui.password} type="password" value={form.password} onChange={(value) => set("password", value)} autoComplete="new-password" error={errors.password} />
-        {form.password && (
-          <div>
-            <div className="rk-meter" aria-hidden>
-              <span style={{ width: `${strength.level * 33}%` }} />
-            </div>
-            <p className="rk-help">{strength.label}</p>
-          </div>
-        )}
-        <Input label={ui.confirmPassword} type="password" value={form.confirm} onChange={(value) => set("confirm", value)} error={errors.confirm} />
+        <Input label={ui.password} type="password" value={form.password} onChange={(value) => set("password", value)} autoComplete="new-password" />
+        <Input label={ui.confirmPassword} type="password" value={form.confirm} onChange={(value) => set("confirm", value)} />
         <div>
           <p className="rk-label" style={{ marginBottom: 8 }}>{ui.iAm}</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -298,9 +250,8 @@ export function RegisterScreen() {
             Privacy Policy
           </button>
         </Checkbox>
-        {errors.agree && <p className="rk-error">{errors.agree}</p>}
         <Button onClick={submit}>{ui.createAccount}</Button>
-        <p className="rk-body" style={{ textAlign: "center" }}>
+        <p className="rk-auth-foot">
           {ui.already}{" "}
           <button type="button" className="rk-link" onClick={() => go("/login")}>
             {ui.signInLink}
@@ -340,8 +291,7 @@ export function VerifyScreen() {
     return () => window.clearTimeout(timer);
   }, [seconds]);
 
-  const submit = (code = digitsCode.join("")) => {
-    if (code.length < 6) return;
+  const submit = () => {
     completeVerify();
     setDone(true);
   };
@@ -366,7 +316,7 @@ export function VerifyScreen() {
                 next[index] = value;
                 setDigits(next);
                 if (value && refs.current[index + 1]) refs.current[index + 1]?.focus();
-                if (next.join("").length === 6) submit(next.join(""));
+                if (next.join("").length === 6) submit();
               }}
               onKeyDown={(event) => {
                 if (event.key === "Backspace" && !digitsCode[index] && refs.current[index - 1]) refs.current[index - 1]?.focus();
@@ -378,7 +328,7 @@ export function VerifyScreen() {
                 const next = paste.split("");
                 while (next.length < 6) next.push("");
                 setDigits(next);
-                if (paste.length === 6) submit(paste);
+                if (paste.length === 6) submit();
               }}
             />
           ))}
@@ -387,7 +337,7 @@ export function VerifyScreen() {
         <button type="button" className="rk-link" disabled={seconds > 0} onClick={() => setSeconds(30)}>
           {seconds > 0 ? `${ui.resend} 00:${String(seconds).padStart(2, "0")}` : ui.resend}
         </button>
-        <Button onClick={() => submit()} disabled={digitsCode.join("").length < 6}>
+        <Button onClick={() => submit()}>
           {ui.verify}
         </Button>
       </div>
@@ -413,13 +363,12 @@ export function VerifyScreen() {
 }
 
 export function ForgotScreen({ step }: { step: number }) {
-  const { resetPassword, state } = useApp();
+  const { resetPassword } = useApp();
   const { go, replace } = useGo();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
   return (
@@ -428,11 +377,9 @@ export function ForgotScreen({ step }: { step: number }) {
         {step === 1 && (
           <>
             <p className="rk-body rk-secondary">{ui.forgotText}</p>
-            <Input label={ui.email} value={email} onChange={setEmail} inputMode="email" error={error} />
+            <Input label={ui.email} value={email} onChange={setEmail} inputMode="email" />
             <Button
               onClick={() => {
-                if (!validEmail(email)) return setError(ui.emailInvalid);
-                if (!state.users.some((user) => user.email.toLowerCase() === email.toLowerCase())) return setError(ui.noAccount);
                 sessionStorage.setItem("risk-reset-email", email);
                 go("/forgot", { step: 2 });
               }}
@@ -461,7 +408,7 @@ export function ForgotScreen({ step }: { step: number }) {
                 />
               ))}
             </div>
-            <Button disabled={code.join("").length < 6} onClick={() => go("/forgot", { step: 3 })}>
+            <Button onClick={() => go("/forgot", { step: 3 })}>
               {ui.continue}
             </Button>
           </>
@@ -469,14 +416,11 @@ export function ForgotScreen({ step }: { step: number }) {
         {step === 3 && (
           <>
             <Input label={ui.newPassword} type="password" value={password} onChange={setPassword} />
-            <Input label={ui.confirmPassword} type="password" value={confirm} onChange={setConfirm} error={error} />
+            <Input label={ui.confirmPassword} type="password" value={confirm} onChange={setConfirm} />
             <Button
               onClick={() => {
-                if (password.length < 8) return setError(ui.passwordShort);
-                if (password !== confirm) return setError(ui.passwordMismatch);
                 const saved = sessionStorage.getItem("risk-reset-email") || email;
-                const message = resetPassword(saved, password);
-                if (message) return setError(message);
+                resetPassword(saved, password);
                 setDone(true);
               }}
             >

@@ -13,7 +13,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppProvider } from "../lib/store";
 import { AppShell } from "../components/AppShell";
-import logo from "../img/logo.png";
 
 
 function NotFoundComponent() {
@@ -91,8 +90,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: logo, type: "image/png" },
-      { rel: "apple-touch-icon", href: logo },
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
 
