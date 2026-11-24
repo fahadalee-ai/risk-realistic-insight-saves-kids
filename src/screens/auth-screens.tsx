@@ -14,18 +14,16 @@ function takeReturn() {
 }
 
 export function SplashScreen() {
-  const { ready, state } = useApp();
+  const { ready } = useApp();
   const { replace } = useGo();
   useEffect(() => {
     if (!ready) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timer = window.setTimeout(() => {
-      if (!state.seenOnboarding) replace("/onboarding");
-      else if (state.session.status === "out") replace("/login");
-      else replace("/home");
+      replace("/onboarding");
     }, reduced ? 400 : 2500);
     return () => window.clearTimeout(timer);
-  }, [ready, state.seenOnboarding, state.session.status, replace]);
+  }, [ready, replace]);
 
   return (
     <div className="rk-splash">
@@ -88,7 +86,7 @@ export function OnboardingScreen() {
             <Button onClick={() => setPage((value) => value + 1)}>{ui.next}</Button>
           ) : (
             <>
-              <Button onClick={() => finish("/register")}>{ui.getStarted}</Button>
+              <Button onClick={() => finish("/login")}>{ui.getStarted}</Button>
               <Button variant="ghost" onClick={() => finish("/login")}>
                 {ui.haveAccount}
               </Button>

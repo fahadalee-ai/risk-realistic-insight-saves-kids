@@ -12,6 +12,7 @@ export const getRouter = () => {
     basepath: basepath || undefined,
     context: { queryClient },
     scrollRestoration: true,
+    scrollToTopSelectors: [".rk-scroll"],
     defaultPreloadStaleTime: 0,
   });
 

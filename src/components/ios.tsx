@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   Bell,
@@ -18,6 +18,7 @@ import { content } from "../data/content.js";
 import { images, type ImageKey } from "../data/images";
 import { dateAvailable, slotAvailable, timeSlots, toIso, todayIso, periods } from "../data/slots.js";
 import { useApp } from "../lib/store";
+import { useRouterState } from "@tanstack/react-router";
 import { isTab, useGo } from "../lib/nav";
 
 const ui = content.ui;
@@ -401,6 +402,7 @@ export function LargeTitleHeader({
   right?: ReactNode;
   scrolled?: boolean;
 }) {
+  if (!scrolled && !right) return null;
   return (
     <header className={`rk-header solid ${scrolled ? "hairline" : ""}`}>
       <div className="rk-bar">
@@ -478,7 +480,15 @@ export function ScreenContainer({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
-  const head = mode === "none" || mode === "overlay" ? "0px" : "calc(var(--safe-t) + 44px)";
+  const locationKey = useRouterState({ select: (state) => state.location.href });
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    node.scrollTop = 0;
+    setScrolled(false);
+  }, [locationKey]);
+  const reserveBar = mode === "inline" || (mode === "large" && Boolean(right));
+  const head = mode === "none" || mode === "overlay" ? "0px" : reserveBar ? "calc(var(--safe-t) + 44px)" : "var(--safe-t)";
   const tab = tabBar ? "calc(49px + var(--safe-b))" : "0px";
   const foot = footer ? "74px" : "0px";
 
