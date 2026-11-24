@@ -230,7 +230,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const confirm = (options: AlertOptions) =>
     new Promise<boolean>((resolve) => {
-      setAlert({ ...options, resolve });
+      setAlert({
+        ...options,
+        resolve: (value) => {
+          setAlert(null);
+          resolve(value);
+        },
+      });
     });
 
   const value: AppContextValue = {
