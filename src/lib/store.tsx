@@ -283,16 +283,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     completeVerify: () => {
       setState((s) => {
-        if (!s.pendingUser) return s;
+        const pending = s.pendingUser ?? {
+          id: uid("user"),
+          firstName: "Guest",
+          lastName: "",
+          email: "",
+          phone: "",
+          countryId: "us",
+          password: "",
+          role: content.roles[0],
+        };
         return {
           ...s,
-          users: [...s.users, s.pendingUser],
-          session: { status: "authed", userId: s.pendingUser.id },
+          users: [...s.users, pending],
+          session: { status: "authed", userId: pending.id },
           pendingUser: null,
           notices: [
             {
               id: uid("note"),
-              userId: s.pendingUser.id,
+              userId: pending.id,
               title: content.brand.title,
               body: content.story,
               time: "Just now",

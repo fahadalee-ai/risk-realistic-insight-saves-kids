@@ -209,7 +209,7 @@ export function RegisterScreen() {
   };
 
   return (
-    <ScreenContainer mode="inline" title={ui.createTitle} fallback="/login">
+    <ScreenContainer mode="inline" title={ui.createTitle} fallback="/login" explicitBack>
       <div className="rk-pad rk-auth-form">
         <p className="rk-wordmark sm">{content.brand.name}</p>
         <Input label={ui.fullName} value={`${form.first}${form.last ? " " + form.last : ""}`} onChange={(value) => {
@@ -280,7 +280,6 @@ export function VerifyScreen() {
   const { replace } = useGo();
   const [digitsCode, setDigits] = useState(["", "", "", "", "", ""]);
   const [seconds, setSeconds] = useState(30);
-  const [done, setDone] = useState(false);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -291,11 +290,12 @@ export function VerifyScreen() {
 
   const submit = () => {
     completeVerify();
-    setDone(true);
+    if (takeReturn() === "review") replace("/book", { step: 5 });
+    else replace("/home");
   };
 
   return (
-    <ScreenContainer mode="inline" title={ui.verifyTitle} fallback="/register">
+    <ScreenContainer mode="inline" title={ui.verifyTitle} fallback="/register" explicitBack>
       <div className="rk-pad rk-stack" style={{ paddingTop: 16 }}>
         <p className="rk-body rk-secondary">{ui.verifyText}</p>
         <p className="rk-help">{state.pendingUser?.email}</p>
@@ -339,23 +339,6 @@ export function VerifyScreen() {
           {ui.verify}
         </Button>
       </div>
-      <Sheet open={done} onClose={() => {}} title={ui.accountReady}>
-        <div className="rk-success-mark" aria-hidden>
-          <svg width="42" height="42" viewBox="0 0 42 42">
-            <circle cx="21" cy="21" r="18" fill="none" stroke="var(--primary)" strokeWidth="3" />
-            <path d="M12 22 l6 6 12-14" fill="none" stroke="var(--primary)" strokeWidth="3" />
-          </svg>
-        </div>
-        <p className="rk-body rk-secondary" style={{ textAlign: "center", margin: "16px 0" }}>{ui.accountReadyText}</p>
-        <Button
-          onClick={() => {
-            if (takeReturn() === "review") replace("/book", { step: 5 });
-            else replace("/home");
-          }}
-        >
-          {ui.backHome}
-        </Button>
-      </Sheet>
     </ScreenContainer>
   );
 }
@@ -370,7 +353,7 @@ export function ForgotScreen({ step }: { step: number }) {
   const [done, setDone] = useState(false);
 
   return (
-    <ScreenContainer mode="inline" title={ui.forgotTitle} fallback="/login">
+    <ScreenContainer mode="inline" title={ui.forgotTitle} fallback="/login" explicitBack>
       <div className="rk-pad rk-stack" style={{ paddingTop: 16 }}>
         {step === 1 && (
           <>

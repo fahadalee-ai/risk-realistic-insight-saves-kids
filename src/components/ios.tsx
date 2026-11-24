@@ -358,11 +358,24 @@ export function ListItem({
   );
 }
 
-export function BackButton({ label = ui.back, fallback = "/home" }: { label?: string; fallback?: string }) {
-  const { back, canGoBack } = useGo();
-  if (!canGoBack) return <span style={{ minWidth: 44 }} />;
+export function BackButton({
+  label = ui.back,
+  fallback = "/home",
+  explicit = false,
+}: {
+  label?: string;
+  fallback?: string;
+  explicit?: boolean;
+}) {
+  const { back, canGoBack, replace } = useGo();
+  if (!canGoBack && !explicit) return <span style={{ minWidth: 44 }} />;
   return (
-    <button type="button" className="rk-back rk-press" onClick={() => back(fallback)} aria-label={label}>
+    <button
+      type="button"
+      className="rk-back rk-press"
+      onClick={() => (explicit ? replace(fallback) : back(fallback))}
+      aria-label={label}
+    >
       <ChevronLeft size={22} />
       <span>{label}</span>
     </button>
@@ -374,17 +387,19 @@ export function AppHeader({
   right,
   scrolled,
   fallback,
+  explicitBack = false,
 }: {
   title?: string;
   right?: ReactNode;
   scrolled?: boolean;
   fallback?: string;
+  explicitBack?: boolean;
 }) {
   return (
     <header className={`rk-header ${scrolled ? "solid hairline" : "solid"}`}>
       <div className="rk-bar">
         <div className="rk-bar-side">
-          <BackButton fallback={fallback} />
+          <BackButton fallback={fallback} explicit={explicitBack} />
         </div>
         <div className="rk-bar-title">{title}</div>
         <div className="rk-bar-side right">{right}</div>
@@ -464,6 +479,7 @@ export function ScreenContainer({
   lock = false,
   onScroll,
   fallback,
+  explicitBack = false,
   header,
 }: {
   children: ReactNode;
@@ -476,6 +492,7 @@ export function ScreenContainer({
   lock?: boolean;
   onScroll?: (top: number) => void;
   fallback?: string;
+  explicitBack?: boolean;
   header?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -493,7 +510,7 @@ export function ScreenContainer({
   const foot = footer ? "74px" : "0px";
 
   return (
-    <div className="rk-screen" style={{ ["--head-space" as string]: head, ["--tab-space" as string]: tab, ["--foot-space" as string]: foot }}>
+    <div className="rk-screen" style={{ ["--head-space" as string]: head, ["--tab-space" as string]: tab, ["--foot-space" as string]: foot, background: explicitBack ? "var(--elevated)" : undefined }}>
       {lock ? (
         <div className="rk-lock">{children}</div>
       ) : (
@@ -517,7 +534,7 @@ export function ScreenContainer({
       )}
       {header}
       {!header && mode === "large" && <LargeTitleHeader title={title || ""} right={right} scrolled={scrolled} />}
-      {!header && mode === "inline" && <AppHeader title={title} right={right} scrolled={scrolled} fallback={fallback} />}
+      {!header && mode === "inline" && <AppHeader title={title} right={right} scrolled={scrolled} fallback={fallback} explicitBack={explicitBack} />}
       {footer}
       {tabBar && <BottomTabBar />}
     </div>
