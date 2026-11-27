@@ -56,8 +56,7 @@ export function HomeScreen() {
               <img src={images.hero} alt="Youth standing together outdoors" />
               <div className="rk-scrim" />
               <div className="rk-hero-copy">
-                <h2>{content.brand.hero}</h2>
-                <p>{content.brand.heroSupport}</p>
+                <h2>{content.brand.heroBanner}</h2>
                 <div className="rk-pills">
                   <Button className="slim" onClick={() => go("/book", { step: 1 })}>
                     {ui.book}

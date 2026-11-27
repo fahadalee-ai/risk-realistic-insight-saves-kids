@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { LayoutGrid, MessageCircle } from "lucide-react";
 import { content } from "../data/content.js";
 import { formatLongDate, serviceById, downloadIcs } from "../lib/format";
 import { useApp, type Appointment } from "../lib/store";
@@ -48,6 +48,12 @@ export function ProfileScreen() {
         </div>
         <div className="rk-pad"><InsetGroupedList>
           <ListItem title={ui.viewAppointments} chevron onPress={() => go("/appointments")} />
+          <ListItem
+            title={ui.tabs.services}
+            leading={<LayoutGrid size={22} color="var(--primary-text)" />}
+            chevron
+            onPress={() => go("/services")}
+          />
           <ListItem
             title={ui.chat}
             subtitle={ui.chatHint}

@@ -10,6 +10,7 @@ export const content = {
     url: "https://riskrealisticinsightsaveskids.vercel.app/",
     quote: "Prevention Begins With Awareness. Change Begins With Insight.",
     hero: "Empowering youth through prevention, education, and awareness to build stronger, safer communities.",
+    heroBanner: "Empowering youth through prevention.",
     heroSupport:
       "Empowering the next generation with the realistic insight needed to navigate life's risks and build stronger, safer communities.",
     metaDescription:

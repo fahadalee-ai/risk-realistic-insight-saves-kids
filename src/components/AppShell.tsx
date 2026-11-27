@@ -5,7 +5,7 @@ import { stripPath } from "../lib/nav";
 import { AlertHost, OfflineBanner, ToastHost } from "./ios";
 
 const PUBLIC = new Set(["/", "/onboarding", "/login", "/register", "/verify", "/forgot"]);
-const TABS = new Set(["/home", "/services", "/resources", "/profile"]);
+const TABS = new Set(["/home", "/chats", "/resources", "/profile"]);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { ready, state, dismissAlert } = useApp();

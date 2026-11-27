@@ -17,7 +17,7 @@ export function ChatListScreen() {
   const mine = state.appointments.filter((item) => item.userId === ownerId);
 
   return (
-    <ScreenContainer mode="inline" title={ui.chat} fallback="/profile">
+    <ScreenContainer mode="large" title={ui.chat} tabBar>
       {mine.length === 0 ? (
         <EmptyState image="emptyAppointments" title={ui.chatEmpty} text={ui.chatEmptyText} action={ui.book} onAction={() => go("/book", { step: 1 })} />
       ) : (

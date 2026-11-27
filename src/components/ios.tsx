@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
   Home,
-  LayoutGrid,
+  MessageCircle,
   UserRound,
   X,
 } from "lucide-react";
@@ -433,9 +433,10 @@ export function BottomTabBar() {
   const { pathname, go } = useGo();
   const { state, ownerId } = useApp();
   const unread = state.notices.filter((item) => item.userId === ownerId && !item.read).length;
+  const unreadChats = (state.messages || []).filter((message) => message.from === "admin" && !message.seen && state.appointments.some((item) => item.id === message.appointmentId && item.userId === ownerId)).length;
   const tabs = [
     { id: "/home", label: ui.tabs.home, icon: Home },
-    { id: "/services", label: ui.tabs.services, icon: LayoutGrid },
+    { id: "/chats", label: ui.chat, icon: MessageCircle },
     { id: "/book", label: ui.tabs.book, icon: CalendarPlus, center: true },
     { id: "/resources", label: ui.tabs.resources, icon: BookOpen },
     { id: "/profile", label: ui.tabs.profile, icon: UserRound },
@@ -459,6 +460,7 @@ export function BottomTabBar() {
             <span className="rk-tab-ico" style={{ position: "relative" }}>
               <Icon size={24} strokeWidth={1.75} fill={on || tab.center ? "currentColor" : "none"} />
               {tab.id === "/home" && unread > 0 && <span className="rk-badge">{unread}</span>}
+              {tab.id === "/chats" && unreadChats > 0 && <span className="rk-badge">{unreadChats}</span>}
             </span>
             {tab.label}
           </button>

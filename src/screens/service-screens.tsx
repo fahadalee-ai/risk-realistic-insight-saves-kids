@@ -21,7 +21,7 @@ export function ServicesScreen() {
   });
 
   return (
-    <ScreenContainer mode="large" title={ui.tabs.services} tabBar>
+    <ScreenContainer mode="inline" title={ui.tabs.services} fallback="/profile">
       <div className="rk-stack" style={{ paddingTop: 8 }}>
         <label className="rk-search">
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={ui.searchServices} aria-label={ui.searchServices} />

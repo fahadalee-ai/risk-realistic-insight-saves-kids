@@ -1,7 +1,7 @@
 import { useCanGoBack, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useApp } from "./store";
 
-const TABS = new Set(["/home", "/services", "/resources", "/profile"]);
+const TABS = new Set(["/home", "/chats", "/resources", "/profile"]);
 
 export function stripPath(pathname: string) {
   const base = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
