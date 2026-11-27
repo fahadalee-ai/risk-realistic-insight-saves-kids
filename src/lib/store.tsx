@@ -161,6 +161,49 @@ const initial = (): Persisted => ({
 
 const KEY = "risk-app-v1";
 
+function ensureSampleChats(state: Persisted): Persisted {
+  const ownerId = state.session.status === "authed" ? state.session.userId : state.session.status === "guest" ? "guest" : "";
+  if (!ownerId) return state;
+  const user = state.session.status === "authed" ? state.users.find((item) => item.id === ownerId) : null;
+  const missing = content.sampleChats.filter((sample) => !state.appointments.some((item) => item.id === `seed-${ownerId}-${sample.id}`));
+  if (missing.length === 0) return state;
+  const hour = 60 * 60 * 1000;
+  const appointments: Appointment[] = missing.map((sample) => ({
+    id: `seed-${ownerId}-${sample.id}`,
+    reference: sample.reference,
+    userId: ownerId,
+    serviceId: sample.serviceId,
+    type: sample.type,
+    date: sample.date,
+    time: sample.time,
+    status: sample.status,
+    forWhom: "myself",
+    name: user ? `${user.firstName} ${user.lastName}`.trim() : "Guest",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    childAge: "",
+    organization: "",
+    attendees: 1,
+    topics: [],
+    notes: "",
+  }));
+  const messages: ChatMessage[] = missing.flatMap((sample, sampleIndex) =>
+    sample.messages.map((message, index) => ({
+      id: `seed-${ownerId}-${sample.id}-${index}`,
+      appointmentId: `seed-${ownerId}-${sample.id}`,
+      from: message.from,
+      text: message.text,
+      createdAt: Date.now() - (missing.length - sampleIndex) * 26 * hour - (sample.messages.length - index) * hour,
+      seen: message.seen,
+    })),
+  );
+  return {
+    ...state,
+    appointments: [...appointments, ...state.appointments],
+    messages: [...(state.messages || []), ...messages],
+  };
+}
+
 type AppContextValue = {
   ready: boolean;
   state: Persisted;
@@ -225,6 +268,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!ready || state.session.status === "out") return;
+    setState((current) => ensureSampleChats(current));
+  }, [ready, state.session]);
 
   useEffect(() => {
     if (ready) localStorage.setItem(KEY, JSON.stringify(state));

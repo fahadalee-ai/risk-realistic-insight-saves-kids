@@ -1034,4 +1034,48 @@ export const content = {
       cancelled: "Cancelled",
     },
   },
+  sampleChats: [
+    {
+      id: "prevention",
+      serviceId: "prevention",
+      type: "in-person",
+      date: "2026-12-04",
+      time: "10:00 AM",
+      status: "confirmed",
+      reference: "RISK-24018",
+      messages: [
+        { from: "admin", text: "Your Youth Prevention Programming visit is confirmed for Thursday at 10:00 AM.", seen: true },
+        { from: "user", text: "We will have about 25 students. Can you start with the peer-pressure module?", seen: true },
+        { from: "admin", text: "Yes. We will open with peer pressure and leave time for questions.", seen: false },
+      ],
+    },
+    {
+      id: "speaking",
+      serviceId: "speaking",
+      type: "in-person",
+      date: "2026-12-11",
+      time: "1:00 PM",
+      status: "pending",
+      reference: "RISK-24042",
+      messages: [
+        { from: "user", text: "Could someone speak at our school assembly on December 11?", seen: true },
+        { from: "admin", text: "We can hold that date. How long is the assembly, and which grades will be there?", seen: true },
+        { from: "user", text: "Forty minutes, grades 8 through 12.", seen: true },
+      ],
+    },
+    {
+      id: "private",
+      serviceId: "private",
+      type: "video",
+      date: "2026-11-12",
+      time: "4:30 PM",
+      status: "completed",
+      reference: "RISK-23811",
+      messages: [
+        { from: "admin", text: "This private discussion is set for a video call. We will send the link the day before.", seen: true },
+        { from: "user", text: "Thank you. We would like to talk about online pressure at home.", seen: true },
+        { from: "admin", text: "We covered that in the session. The parent guide is in Resources if you want to revisit it.", seen: true },
+      ],
+    },
+  ],
 };
