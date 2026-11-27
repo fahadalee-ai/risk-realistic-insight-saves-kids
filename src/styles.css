@@ -533,7 +533,7 @@ html[data-nav="pop"] .rk-screen { animation: rk-pop 300ms ease-out; }
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  min-height: 340px;
+  min-height: 228px;
   color: #fff;
   display: flex;
   align-items: flex-end;
@@ -544,7 +544,7 @@ html[data-nav="pop"] .rk-screen { animation: rk-pop 300ms ease-out; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 22%;
+  object-position: center 32%;
 }
 .rk-photo img { width: 100%; height: 100%; object-fit: cover; }
 .rk-scrim {
