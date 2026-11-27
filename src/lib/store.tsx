@@ -70,6 +70,15 @@ export type BookingDraft = {
   rescheduleId: string;
 };
 
+export type ChatMessage = {
+  id: string;
+  appointmentId: string;
+  from: "user" | "admin";
+  text: string;
+  createdAt: number;
+  seen?: boolean;
+};
+
 export type Notice = {
   id: string;
   userId: string;
@@ -94,6 +103,7 @@ type Persisted = {
   session: Session;
   users: User[];
   appointments: Appointment[];
+  messages: ChatMessage[];
   notices: Notice[];
   saved: Record<string, string[]>;
   appearance: "system" | "light" | "dark";
@@ -138,6 +148,7 @@ const initial = (): Persisted => ({
   session: { status: "out" },
   users: [],
   appointments: [],
+  messages: [],
   notices: [],
   saved: {},
   appearance: "system",
@@ -169,6 +180,8 @@ type AppContextValue = {
   resetBooking: () => void;
   confirmBooking: () => Appointment | null;
   cancelAppointment: (id: string, reason: string) => void;
+  openChat: (appointmentId: string) => void;
+  sendChat: (appointmentId: string, text: string) => void;
   toggleSave: (resourceId: string) => boolean;
   isSaved: (resourceId: string) => boolean;
   markAllRead: () => void;
@@ -196,7 +209,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const parsed = JSON.parse(raw) as Persisted;
-        setState({ ...initial(), ...parsed, booking: { ...emptyBooking(), ...parsed.booking } });
+        setState({
+          ...initial(),
+          ...parsed,
+          booking: { ...emptyBooking(), ...parsed.booking },
+          messages: Array.isArray(parsed.messages) ? parsed.messages : [],
+        });
       }
     } catch {
       /* keep defaults */
@@ -335,11 +353,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState((s) => {
         if (s.session.status !== "authed") return { ...s, session: { status: "out" } };
         const userId = s.session.userId;
+        const removed = new Set(s.appointments.filter((item) => item.userId === userId).map((item) => item.id));
         return {
           ...s,
           session: { status: "out" },
           users: s.users.filter((item) => item.id !== userId),
           appointments: s.appointments.filter((item) => item.userId !== userId),
+          messages: (s.messages || []).filter((item) => !removed.has(item.appointmentId)),
           notices: s.notices.filter((item) => item.userId !== userId),
         };
       }),
@@ -395,6 +415,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         appointments: [appointment, ...s.appointments],
         booking: emptyBooking(),
         lastReference: appointment.reference,
+        messages: [
+          {
+            id: uid("msg"),
+            appointmentId: appointment.id,
+            from: "admin",
+            text: content.ui.chatWelcome,
+            createdAt: Date.now(),
+            seen: false,
+          },
+          ...(s.messages || []),
+        ],
         notices: [
           {
             id: uid("note"),
@@ -410,6 +441,63 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ],
       }));
       return appointment;
+    },
+    openChat: (appointmentId) =>
+      setState((s) => {
+        const messages = s.messages || [];
+        const thread = messages.filter((item) => item.appointmentId === appointmentId);
+        if (thread.length === 0) {
+          return {
+            ...s,
+            messages: [
+              ...messages,
+              {
+                id: uid("msg"),
+                appointmentId,
+                from: "admin",
+                text: content.ui.chatWelcome,
+                createdAt: Date.now(),
+                seen: true,
+              },
+            ],
+          };
+        }
+        if (thread.every((item) => item.from !== "admin" || item.seen)) return s;
+        return {
+          ...s,
+          messages: messages.map((item) =>
+            item.appointmentId === appointmentId && item.from === "admin" ? { ...item, seen: true } : item,
+          ),
+        };
+      }),
+    sendChat: (appointmentId, text) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      const message: ChatMessage = {
+        id: uid("msg"),
+        appointmentId,
+        from: "user",
+        text: trimmed,
+        createdAt: Date.now(),
+        seen: true,
+      };
+      setState((s) => ({ ...s, messages: [...(s.messages || []), message] }));
+      window.setTimeout(() => {
+        setState((s) => ({
+          ...s,
+          messages: [
+            ...(s.messages || []),
+            {
+              id: uid("msg"),
+              appointmentId,
+              from: "admin",
+              text: content.ui.chatReply,
+              createdAt: Date.now(),
+              seen: false,
+            },
+          ],
+        }));
+      }, 700);
     },
     cancelAppointment: (id, reason) =>
       setState((s) => ({

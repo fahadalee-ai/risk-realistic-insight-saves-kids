@@ -233,6 +233,7 @@ export function BookScreen({ step }: { step: number }) {
             >
               {ui.share}
             </Button>
+            <Button variant="secondary" onClick={() => go(`/chat/${created.id}`)}>{ui.chatWith}</Button>
             <Button variant="secondary" onClick={() => go("/appointments")}>{ui.viewAppointments}</Button>
             <Button onClick={() => replace("/home")}>{ui.backHome}</Button>
           </div>

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { content } from "../data/content.js";
 import { formatLongDate, serviceById, downloadIcs } from "../lib/format";
 import { useApp, type Appointment } from "../lib/store";
@@ -21,10 +22,11 @@ import {
 const ui = content.ui;
 
 export function ProfileScreen() {
-  const { user, state, signOut, deleteAccount, confirm } = useApp();
+  const { user, state, ownerId, signOut, deleteAccount, confirm } = useApp();
   const { go, replace } = useGo();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const name = user ? `${user.firstName} ${user.lastName}` : "Guest";
+  const unreadChats = (state.messages || []).filter((message) => message.from === "admin" && !message.seen && state.appointments.some((item) => item.id === message.appointmentId && item.userId === ownerId)).length;
 
   return (
     <ScreenContainer mode="large" title={ui.tabs.profile} tabBar>
@@ -47,6 +49,14 @@ export function ProfileScreen() {
         </div>
         <div className="rk-pad"><InsetGroupedList>
           <ListItem title={ui.viewAppointments} chevron onPress={() => go("/appointments")} />
+          <ListItem
+            title={ui.chat}
+            subtitle={ui.chatHint}
+            leading={<MessageCircle size={22} color="var(--primary-text)" />}
+            trailing={unreadChats > 0 ? <span className="rk-pill-count">{unreadChats}</span> : undefined}
+            chevron
+            onPress={() => go("/chats")}
+          />
           <ListItem title={ui.saved} chevron onPress={() => go("/saved")} />
           <ListItem title={ui.notifications} chevron onPress={() => go("/notifications")} />
         </InsetGroupedList></div>
@@ -193,6 +203,7 @@ export function AppointmentDetailScreen({ appointmentId }: { appointmentId: stri
             <p className="rk-link">{ui.openMaps}</p>
           </a>
         )}
+        <Button onClick={() => go(`/chat/${item.id}`)}>{ui.chatWith}</Button>
         {active && (
           <Button
             variant="secondary"

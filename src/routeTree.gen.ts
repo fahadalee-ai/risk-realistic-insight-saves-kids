@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppearanceRouteImport } from './routes/appearance'
 import { Route as AppointmentsRouteImport } from './routes/appointments'
 import { Route as BookRouteImport } from './routes/book'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as EditProfileRouteImport } from './routes/edit-profile'
 import { Route as ForgotRouteImport } from './routes/forgot'
@@ -33,6 +34,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as AppointmentAppointmentIdRouteImport } from './routes/appointment.$appointmentId'
+import { Route as ChatAppointmentIdRouteImport } from './routes/chat.$appointmentId'
 import { Route as ResourceResourceIdRouteImport } from './routes/resource.$resourceId'
 import { Route as ServiceServiceIdRouteImport } from './routes/service.$serviceId'
 
@@ -59,6 +61,11 @@ const AppointmentsRoute = AppointmentsRouteImport.update({
 const BookRoute = BookRouteImport.update({
   id: '/book',
   path: '/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -157,6 +164,11 @@ const AppointmentAppointmentIdRoute =
     path: '/appointment/$appointmentId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ChatAppointmentIdRoute = ChatAppointmentIdRouteImport.update({
+  id: '/chat/$appointmentId',
+  path: '/chat/$appointmentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResourceResourceIdRoute = ResourceResourceIdRouteImport.update({
   id: '/resource/$resourceId',
   path: '/resource/$resourceId',
@@ -174,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/appearance': typeof AppearanceRoute
   '/appointments': typeof AppointmentsRoute
   '/book': typeof BookRoute
+  '/chats': typeof ChatsRoute
   '/contact': typeof ContactRoute
   '/edit-profile': typeof EditProfileRoute
   '/forgot': typeof ForgotRoute
@@ -193,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/appointment/$appointmentId': typeof AppointmentAppointmentIdRoute
+  '/chat/$appointmentId': typeof ChatAppointmentIdRoute
   '/resource/$resourceId': typeof ResourceResourceIdRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
 }
@@ -202,6 +216,7 @@ export interface FileRoutesByTo {
   '/appearance': typeof AppearanceRoute
   '/appointments': typeof AppointmentsRoute
   '/book': typeof BookRoute
+  '/chats': typeof ChatsRoute
   '/contact': typeof ContactRoute
   '/edit-profile': typeof EditProfileRoute
   '/forgot': typeof ForgotRoute
@@ -221,6 +236,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/appointment/$appointmentId': typeof AppointmentAppointmentIdRoute
+  '/chat/$appointmentId': typeof ChatAppointmentIdRoute
   '/resource/$resourceId': typeof ResourceResourceIdRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
 }
@@ -231,6 +247,7 @@ export interface FileRoutesById {
   '/appearance': typeof AppearanceRoute
   '/appointments': typeof AppointmentsRoute
   '/book': typeof BookRoute
+  '/chats': typeof ChatsRoute
   '/contact': typeof ContactRoute
   '/edit-profile': typeof EditProfileRoute
   '/forgot': typeof ForgotRoute
@@ -250,6 +267,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/appointment/$appointmentId': typeof AppointmentAppointmentIdRoute
+  '/chat/$appointmentId': typeof ChatAppointmentIdRoute
   '/resource/$resourceId': typeof ResourceResourceIdRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
 }
@@ -261,6 +279,7 @@ export interface FileRouteTypes {
     | '/appearance'
     | '/appointments'
     | '/book'
+    | '/chats'
     | '/contact'
     | '/edit-profile'
     | '/forgot'
@@ -280,6 +299,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/appointment/$appointmentId'
+    | '/chat/$appointmentId'
     | '/resource/$resourceId'
     | '/service/$serviceId'
   fileRoutesByTo: FileRoutesByTo
@@ -289,6 +309,7 @@ export interface FileRouteTypes {
     | '/appearance'
     | '/appointments'
     | '/book'
+    | '/chats'
     | '/contact'
     | '/edit-profile'
     | '/forgot'
@@ -308,6 +329,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/appointment/$appointmentId'
+    | '/chat/$appointmentId'
     | '/resource/$resourceId'
     | '/service/$serviceId'
   id:
@@ -317,6 +339,7 @@ export interface FileRouteTypes {
     | '/appearance'
     | '/appointments'
     | '/book'
+    | '/chats'
     | '/contact'
     | '/edit-profile'
     | '/forgot'
@@ -336,6 +359,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/appointment/$appointmentId'
+    | '/chat/$appointmentId'
     | '/resource/$resourceId'
     | '/service/$serviceId'
   fileRoutesById: FileRoutesById
@@ -346,6 +370,7 @@ export interface RootRouteChildren {
   AppearanceRoute: typeof AppearanceRoute
   AppointmentsRoute: typeof AppointmentsRoute
   BookRoute: typeof BookRoute
+  ChatsRoute: typeof ChatsRoute
   ContactRoute: typeof ContactRoute
   EditProfileRoute: typeof EditProfileRoute
   ForgotRoute: typeof ForgotRoute
@@ -365,6 +390,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   AppointmentAppointmentIdRoute: typeof AppointmentAppointmentIdRoute
+  ChatAppointmentIdRoute: typeof ChatAppointmentIdRoute
   ResourceResourceIdRoute: typeof ResourceResourceIdRoute
   ServiceServiceIdRoute: typeof ServiceServiceIdRoute
 }
@@ -404,6 +430,13 @@ declare module '@tanstack/react-router' {
       path: '/book'
       fullPath: '/book'
       preLoaderRoute: typeof BookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -539,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppointmentAppointmentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$appointmentId': {
+      id: '/chat/$appointmentId'
+      path: '/chat/$appointmentId'
+      fullPath: '/chat/$appointmentId'
+      preLoaderRoute: typeof ChatAppointmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/resource/$resourceId': {
       id: '/resource/$resourceId'
       path: '/resource/$resourceId'
@@ -562,6 +602,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppearanceRoute: AppearanceRoute,
   AppointmentsRoute: AppointmentsRoute,
   BookRoute: BookRoute,
+  ChatsRoute: ChatsRoute,
   ContactRoute: ContactRoute,
   EditProfileRoute: EditProfileRoute,
   ForgotRoute: ForgotRoute,
@@ -581,6 +622,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   AppointmentAppointmentIdRoute: AppointmentAppointmentIdRoute,
+  ChatAppointmentIdRoute: ChatAppointmentIdRoute,
   ResourceResourceIdRoute: ResourceResourceIdRoute,
   ServiceServiceIdRoute: ServiceServiceIdRoute,
 }
