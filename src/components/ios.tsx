@@ -607,8 +607,8 @@ export function AlertHost() {
     alert.resolve(value);
   };
   return createPortal(
-    <div className="rk-alert-back">
-      <div className="rk-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-title">
+    <div className="rk-alert-back" onClick={() => close(false)}>
+      <div className="rk-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" onClick={(event) => event.stopPropagation()}>
         <h2 id="alert-title">{alert.title}</h2>
         <p>{alert.message}</p>
         <div className="rk-alert-actions">

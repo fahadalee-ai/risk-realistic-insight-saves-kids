@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useApp } from "../lib/store";
 import { stripPath } from "../lib/nav";
@@ -8,17 +8,24 @@ const PUBLIC = new Set(["/", "/onboarding", "/login", "/register", "/verify", "/
 const TABS = new Set(["/home", "/services", "/resources", "/profile"]);
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { ready, state } = useApp();
+  const { ready, state, dismissAlert } = useApp();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (router) => stripPath(router.location.pathname) });
+  const dismissRef = useRef(dismissAlert);
+  dismissRef.current = dismissAlert;
 
   useEffect(() => {
     const onPop = () => {
       document.documentElement.dataset.nav = "pop";
+      dismissRef.current();
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+
+  useEffect(() => {
+    dismissRef.current();
+  }, [pathname]);
 
   useEffect(() => {
     const onFocus = (event: FocusEvent) => {

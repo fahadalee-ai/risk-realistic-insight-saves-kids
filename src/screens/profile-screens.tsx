@@ -7,7 +7,6 @@ import { useGo } from "../lib/nav";
 import {
   Avatar,
   Button,
-  Chip,
   EmptyState,
   InsetGroupedList,
   Input,
@@ -171,8 +170,6 @@ export function AppointmentDetailScreen({ appointmentId }: { appointmentId: stri
   const app = useApp();
   const { go } = useGo();
   const item = app.state.appointments.find((appointment) => appointment.id === appointmentId);
-  const [reasonOpen, setReasonOpen] = useState(false);
-  const [reason, setReason] = useState(content.cancelReasons[0]);
   if (!item) {
     return (
       <ScreenContainer mode="inline" title={ui.details}>
@@ -228,17 +225,6 @@ export function AppointmentDetailScreen({ appointmentId }: { appointmentId: stri
             {ui.reschedule}
           </Button>
         )}
-        {active && (
-          <Button
-            variant="destructive"
-            onClick={async () => {
-              const ok = await app.confirm({ title: ui.cancelTitle, message: ui.cancelText, confirmLabel: ui.cancel, destructive: true });
-              if (ok) setReasonOpen(true);
-            }}
-          >
-            {ui.cancel}
-          </Button>
-        )}
         <Button variant="secondary" onClick={() => go("/contact")}>{ui.contactUs}</Button>
         <Button
           variant="ghost"
@@ -257,23 +243,6 @@ export function AppointmentDetailScreen({ appointmentId }: { appointmentId: stri
           {ui.addCalendar}
         </Button>
       </div>
-      <Sheet open={reasonOpen} onClose={() => setReasonOpen(false)} title={ui.reason}>
-        <div className="rk-stack">
-          {content.cancelReasons.map((option) => (
-            <Chip key={option} selected={reason === option} onClick={() => setReason(option)}>{option}</Chip>
-          ))}
-          <Button
-            variant="destructive"
-            onClick={() => {
-              app.cancelAppointment(item.id, reason);
-              setReasonOpen(false);
-              app.toast(ui.cancelled);
-            }}
-          >
-            {ui.cancel}
-          </Button>
-        </div>
-      </Sheet>
     </ScreenContainer>
   );
 }

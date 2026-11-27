@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -192,6 +193,7 @@ type AppContextValue = {
   setNotif: (key: keyof NotifSettings, value: boolean) => void;
   toast: (message: string) => void;
   confirm: (options: AlertOptions) => Promise<boolean>;
+  dismissAlert: () => void;
   toasts: ToastItem[];
   alert: (AlertOptions & { resolve: (value: boolean) => void }) | null;
 };
@@ -203,6 +205,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [alert, setAlert] = useState<AppContextValue["alert"]>(null);
+  const alertRef = useRef(alert);
+  alertRef.current = alert;
 
   useEffect(() => {
     try {
@@ -257,6 +261,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
     });
 
+  const dismissAlert = () => {
+    const current = alertRef.current;
+    if (!current) return;
+    current.resolve(false);
+  };
+
   const value: AppContextValue = {
     ready,
     state,
@@ -266,6 +276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     alert,
     toast,
     confirm,
+    dismissAlert,
     setSeenOnboarding: () => setState((s) => ({ ...s, seenOnboarding: true })),
     signIn: (email, password) => {
       const found = state.users.find((item) => item.email.toLowerCase() === email.trim().toLowerCase());

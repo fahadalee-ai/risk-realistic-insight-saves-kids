@@ -1,4 +1,5 @@
 import { useCanGoBack, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { useApp } from "./store";
 
 const TABS = new Set(["/home", "/services", "/resources", "/profile"]);
 
@@ -17,6 +18,7 @@ export function useGo() {
   const router = useRouter();
   const canGoBack = useCanGoBack();
   const pathname = useRouterState({ select: (state) => stripPath(state.location.pathname) });
+  const { dismissAlert } = useApp();
 
   const go = (to: string, search?: Record<string, unknown>) => {
     const tab = TABS.has(pathname) && TABS.has(to);
@@ -30,6 +32,7 @@ export function useGo() {
   };
 
   const back = (fallback = "/home") => {
+    dismissAlert();
     document.documentElement.dataset.nav = "pop";
     if (canGoBack) router.history.back();
     else navigate({ to: fallback } as never);
